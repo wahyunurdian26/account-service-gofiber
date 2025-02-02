@@ -1,0 +1,45 @@
+package repositories
+
+import (
+	"fmt"
+	"math/rand"
+	"service-account/internal/entities"
+	"time"
+
+	"github.com/jmoiron/sqlx"
+)
+
+type NasabahRepository struct {
+	db *sqlx.DB
+}
+
+func NewNasabahRepository(db *sqlx.DB) *NasabahRepository {
+	return &NasabahRepository{db: db}
+}
+
+// **Fungsi untuk generate nomor rekening**
+func generateNomorRekening() string {
+    randGenerator := rand.New(rand.NewSource(time.Now().UnixNano()))
+    return fmt.Sprintf("%d", randGenerator.Intn(10000000000)) // Angka 10 digit
+}
+
+// **Daftar Nasabah (dengan generate nomor rekening)**
+func (r *NasabahRepository) Create(nasabah *entities.Nasabah) (string, error) {
+    var noRekening string
+    query := `INSERT INTO nasabah (nama, nik, no_hp) VALUES ($1, $2, $3) RETURNING no_rekening`
+    err := r.db.QueryRow(query, nasabah.Nama, nasabah.NIK, nasabah.NoHP).Scan(&noRekening)
+    if err != nil {
+        fmt.Println("Error saat INSERT nasabah:", err)
+        return "", err
+    }
+    return noRekening, nil
+}
+
+
+
+func (r *NasabahRepository) FindByNIKOrNoHP(nik, noHP string) (bool, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM nasabah WHERE nik = $1 OR no_hp = $2`
+	err := r.db.QueryRow(query, nik, noHP).Scan(&count)
+	return count > 0, err
+}
