@@ -18,26 +18,23 @@ func NewNasabahController(nasabahUseCase *usecases.NasabahUseCase) *NasabahContr
 
 // DaftarNasabah - Registrasi Nasabah Baru
 func (c *NasabahController) DaftarNasabah(ctx *fiber.Ctx) error {
-	var nasabah entities.Nasabah
-	if err := ctx.BodyParser(&nasabah); err != nil {
-		// Log error jika parsing gagal
-		fmt.Println("Error saat parsing request:", err)
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"remark": "Invalid request payload"})
-	}
+    var nasabah entities.Nasabah
+    if err := ctx.BodyParser(&nasabah); err != nil {
+        return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"remark": "Invalid request payload"})
+    }
 
-	noRekening, err := c.nasabahUseCase.DaftarNasabah(&nasabah)
-	if err != nil {
-		// Log error jika ada masalah pada use case
-		fmt.Println("Error saat mendaftar nasabah:", err)
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"remark": "Internal server error"})
-	}
-	if noRekening == "" {
-		// Log error jika NIK atau No HP sudah ada
-		fmt.Println("NIK atau No HP sudah ada")
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"remark": "NIK or No HP already exists"})
-	}
+    noRekening, err := c.nasabahUseCase.DaftarNasabah(&nasabah)
+    if err != nil {
+        fmt.Println("Error saat mendaftar nasabah:", err)
+        return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"remark": "Internal server error"})
+    }
 
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"no_rekening": noRekening})
+    // Pastikan noRekening bukan kosong
+    if noRekening == "" {
+        return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"remark": "NIK or No HP already exists"})
+    }
+
+    return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"no_rekening": noRekening})
 }
 
 

@@ -19,31 +19,30 @@ func NewNasabahRepository(db *sqlx.DB) *NasabahRepository {
 
 // **Fungsi untuk generate nomor rekening**
 func generateNoRekening() string {
-    // Gunakan rand.New dengan sumber acak yang didasarkan pada waktu
-    r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-    // Prefix untuk jenis rekening, misalnya "1" untuk Tabungan
-    prefix := "1"
-    
-    // Generate nomor urut acak (12 digit) antara 100000000000 dan 999999999999
-    noUrut := r.Int63n(900000000000) + 100000000000 // Angka antara 100000000000 dan 999999999999
-    
-    // Gabungkan prefix dan nomor urut menjadi satu nomor rekening dengan format yang benar
-    return fmt.Sprintf("%s%012d", prefix, noUrut) // %012d memastikan panjang nomor rekening 12 digit
+	rand.Seed(time.Now().UnixNano()) // pastikan menggunakan metode terbaru, sesuai versi Go
+	prefix := "1"
+	noUrut := rand.Int63n(1000000000000) // Angka acak 12 digit
+	return fmt.Sprintf("%s%013d", prefix, noUrut) // Gabungkan prefix dan nomor acak menjadi satu nomor rekening
 }
+
 
 // **Daftar Nasabah (dengan generate nomor rekening)**
 func (r *NasabahRepository) Create(nasabah *entities.Nasabah) (string, error) {
     var noRekening string
-    query := `INSERT INTO nasabah (nama, nik, no_hp) VALUES ($1, $2, $3) RETURNING no_rekening`
-    err := r.db.QueryRow(query, nasabah.Nama, nasabah.NIK, nasabah.NoHP).Scan(&noRekening)
+    query := `INSERT INTO nasabah (nama, nik, no_hp, no_rekening) 
+              VALUES ($1, $2, $3, $4) RETURNING no_rekening`
+    
+    noRekening = generateNoRekening() // Memanggil fungsi untuk menghasilkan nomor rekening
+    
+    err := r.db.QueryRow(query, nasabah.Nama, nasabah.NIK, nasabah.NoHP, noRekening).Scan(&noRekening)
     
     if err != nil {
         fmt.Println("Error saat INSERT nasabah:", err)
-        return "", fmt.Errorf("error saat insert nasabah: %w", err) 
+        return "", fmt.Errorf("error saat insert nasabah: %w", err)
     }
     return noRekening, nil
 }
+
 
 
 
