@@ -42,13 +42,16 @@ func main() {
 	// Routes
 	app.Post("/daftar", nasabahController.DaftarNasabah)
 	app.Post("/tabung", nasabahController.Tabung)
+
+	
 	app.Post("/tarik", nasabahController.Tarik)
 	app.Get("/saldo/:no_rekening", nasabahController.CekSaldo)
 
 	// Start server
 	port := ":8080"
 	appLogger.Log.Info("Server started on port ", port)
-	if err := app.Listen(port); err != nil {
+	if err := app.Listen(port); 
+	err != nil {
 		appLogger.Log.Error("Failed to start server: ", err)
 	}
 }

@@ -10,7 +10,8 @@ import (
 )
 
 func InitDB() (*sqlx.DB, error) {
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	connStr := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		"db", "5432", "postgres", "password", "service_account")
 
 	var db *sqlx.DB

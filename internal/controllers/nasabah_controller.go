@@ -26,7 +26,7 @@ func (c *NasabahController) DaftarNasabah(ctx *fiber.Ctx) error {
     noRekening, err := c.nasabahUseCase.DaftarNasabah(&nasabah)
     if err != nil {
         fmt.Println("Error saat mendaftar nasabah:", err)
-        return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"remark": "Internal server error"})
+        return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"remark": err.Error()})
     }
 
     // Pastikan noRekening bukan kosong
