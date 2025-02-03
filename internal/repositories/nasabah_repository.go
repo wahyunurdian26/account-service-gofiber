@@ -19,10 +19,10 @@ func NewNasabahRepository(db *sqlx.DB) *NasabahRepository {
 
 // **Fungsi untuk generate nomor rekening**
 func generateNoRekening() string {
-	rand.Seed(time.Now().UnixNano()) // pastikan menggunakan metode terbaru, sesuai versi Go
+	rand.Seed(time.Now().UnixNano()) 
 	prefix := "1"
 	noUrut := rand.Int63n(1000000000000) // Angka acak 12 digit
-	return fmt.Sprintf("%s%013d", prefix, noUrut) // Gabungkan prefix dan nomor acak menjadi satu nomor rekening
+	return fmt.Sprintf("%s%013d", prefix, noUrut) // Gabungan prefix dan nomor acak menjadi satu nomor rekening
 }
 
 
