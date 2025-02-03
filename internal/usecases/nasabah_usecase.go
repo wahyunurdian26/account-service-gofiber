@@ -30,10 +30,10 @@ func (uc *NasabahUseCase) DaftarNasabah(nasabah *entities.Nasabah) (string, erro
 	}
 
 	// Inisialisasi saldo
-	_, err = uc.saldoRepo.UpdateSaldo(noRekening, 0)
-	if err != nil {
-		return "", err
-	}
+	// _, err = uc.saldoRepo.UpdateSaldo(noRekening, 0)
+	// if err != nil {
+	// 	return "", err
+	// }
 
 	return noRekening, nil
 }

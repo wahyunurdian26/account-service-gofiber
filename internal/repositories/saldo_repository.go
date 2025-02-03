@@ -16,7 +16,10 @@ func (r *SaldoRepository) UpdateSaldo(noRekening string, nominal float64) (float
     var saldo float64
     query := `UPDATE saldo SET saldo = saldo + $1 WHERE no_rekening = $2 RETURNING saldo`
     err := r.db.QueryRow(query, nominal, noRekening).Scan(&saldo)
-    return saldo, err
+    if err != nil {
+return 0, err
+}
+    return saldo, nil
 }
 
 func (r *SaldoRepository) GetSaldo(noRekening string) (float64, error) { // Menggunakan string dan float64
