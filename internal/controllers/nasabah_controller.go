@@ -31,7 +31,7 @@ func (c *NasabahController) DaftarNasabah(ctx *fiber.Ctx) error {
 
     // Pastikan noRekening bukan kosong
     if noRekening == "" {
-        return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"remark": "NIK or No HP already exists"})
+        return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"remark": "NIK atau No HP sudah terdaftar"})
     }
 
     return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"no_rekening": noRekening})
