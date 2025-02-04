@@ -49,22 +49,19 @@ func (uc *NasabahUseCase) DaftarNasabah(nasabah *entities.Nasabah) (string, erro
 
 // Tabung - Deposit funds into the account
 func (uc *NasabahUseCase) Tabung(noRekening string, jumlah float64) error {
-    saldo, err := uc.saldoRepo.GetSaldo(noRekening)
-    if err != nil {
-        return err
+    if jumlah <= 0 {
+        return errors.New("deposit amount must be greater than zero")
     }
 
-    // Update saldo with deposit
-    newSaldo := saldo + jumlah
-    if _, err := uc.saldoRepo.UpdateSaldo(noRekening, newSaldo); err != nil {
-        return err
-    }
-
-    return nil
+    _, err := uc.saldoRepo.UpdateSaldo(noRekening, jumlah)
+    return err
 }
 
-// Tarik - Withdraw funds from the account
 func (uc *NasabahUseCase) Tarik(noRekening string, jumlah float64) error {
+    if jumlah <= 0 {
+        return errors.New("withdraw amount must be greater than zero")
+    }
+
     saldo, err := uc.saldoRepo.GetSaldo(noRekening)
     if err != nil {
         return err
@@ -74,13 +71,10 @@ func (uc *NasabahUseCase) Tarik(noRekening string, jumlah float64) error {
         return errors.New("insufficient balance")
     }
 
-    // Gunakan nilai negatif untuk menarik saldo
-    if _, err := uc.saldoRepo.UpdateSaldo(noRekening, -jumlah); err != nil {
-        return err
-    }
-
-    return nil
+    _, err = uc.saldoRepo.UpdateSaldo(noRekening, -jumlah)
+    return err
 }
+
 
 
 // CekSaldo - Check the current balance of the account

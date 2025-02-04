@@ -15,30 +15,26 @@ func NewSaldoRepository(db *sqlx.DB) *SaldoRepository {
 }
 
 func (r *SaldoRepository) UpdateSaldo(noRekening string, nominal float64) (float64, error) {
-    query := `UPDATE saldo SET saldo = saldo + $1 WHERE no_rekening = $2`
-    result, err := r.db.Exec(query, nominal, noRekening)
+    tx, err := r.db.Begin()
     if err != nil {
-        return 0, fmt.Errorf("Error Update Saldo : %w", err)
+        return 0, fmt.Errorf("failed to begin transaction: %w", err)
     }
+    defer tx.Rollback() // Jika terjadi error, rollback otomatis
 
-    // Pastikan ada baris yang diperbarui
-    rowsAffected, err := result.RowsAffected()
-    if err != nil {
-        return 0, fmt.Errorf("Error Get RowAffected : %w", err)
-    }
-    if rowsAffected == 0 {
-        return 0, fmt.Errorf("no rows affected, rekening not found")
-    }
-
-    // Ambil saldo terbaru setelah update
+    query := `UPDATE saldo SET saldo = saldo + $1 WHERE no_rekening = $2 RETURNING saldo`
     var saldo float64
-    err = r.db.QueryRow(`SELECT saldo FROM saldo WHERE no_rekening = $1`, noRekening).Scan(&saldo)
+    err = tx.QueryRow(query, nominal, noRekening).Scan(&saldo)
     if err != nil {
-        return 0, fmt.Errorf("error select saldo: %w", err)
+        return 0, fmt.Errorf("error updating saldo: %w", err)
+    }
+
+    if err := tx.Commit(); err != nil {
+        return 0, fmt.Errorf("failed to commit transaction: %w", err)
     }
 
     return saldo, nil
 }
+
 func (r *SaldoRepository) InsertSaldo(noRekening string, nominal float64) error {
     query := `INSERT INTO saldo (no_rekening, saldo) VALUES ($1, $2)`
     _, err := r.db.Exec(query, noRekening, nominal)

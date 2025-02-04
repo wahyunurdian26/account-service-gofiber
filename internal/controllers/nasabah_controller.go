@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"service-account/internal/entities"
 	"service-account/internal/usecases"
@@ -77,10 +79,18 @@ func (c *NasabahController) Tarik(ctx *fiber.Ctx) error {
 
 // **CekSaldo - Melihat Saldo Nasabah**
 func (c *NasabahController) CekSaldo(ctx *fiber.Ctx) error {
-	noRekening := ctx.Params("no_rekening")
-	saldo, err := c.nasabahUseCase.CekSaldo(noRekening)
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"remark": "Internal server error"})
-	}
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"no_rekening": noRekening, "saldo": saldo})
+    noRekening := ctx.Params("no_rekening")
+
+    saldo, err := c.nasabahUseCase.CekSaldo(noRekening)
+    if err != nil {
+        if errors.Is(err, sql.ErrNoRows) {
+            return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{"remark": "Account not found"})
+        }
+        return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"remark": "Failed to retrieve balance"})
+    }
+
+    return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+        "no_rekening": noRekening,
+        "saldo":       saldo,
+    })
 }
